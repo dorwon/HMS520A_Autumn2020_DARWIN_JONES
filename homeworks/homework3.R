@@ -143,13 +143,15 @@ lin_fit <- function(x, y) {
 
 poly_fit <- function(x, y, degree = 1) {
 
-  lm(y ~ poly(x, degree, raw = TRUE))$coefficients
+  model <- lm(y ~ poly(x, degree, raw = TRUE))
+  
+  coefficients(model)
 }
 
 # create a poly_pred with x and coeff as arguments
 # and returns the dependent vectors
 
 poly_pred <- function(x, coef) {
-  
-  poly(x, degree = (length(coef)-1), raw = TRUE, coefs = coef)
+  print(coef)
+  poly(x, degree = (length(coef)-1), coefs = coef, raw = TRUE, simple = TRUE)
 }
