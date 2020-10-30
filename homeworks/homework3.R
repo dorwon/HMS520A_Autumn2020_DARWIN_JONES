@@ -60,8 +60,7 @@ fib <- function(n, starting_values = c(0,1)) {
   
   # check for an integer > 0
   if(!is.integer(n) | n < 0) {
-    print(!is.integer(n) | n < 0)
-    stop("error: n must be an integer")
+    stop("error: n must be an integer which is greater than 0")
   }
   
   # If n = 0:1, return predecided A_0 A_1
@@ -152,6 +151,14 @@ poly_fit <- function(x, y, degree = 1) {
 # and returns the dependent vectors
 
 poly_pred <- function(x, coef) {
-  print(coef)
-  poly(x, degree = (length(coef)-1), coefs = coef, raw = TRUE, simple = TRUE)
+  
+  #create basis for polynomial
+   eq <- poly(x, degree = (length(coef)-1), raw = TRUE)
+  
+  #add column for constant
+  eq <- cbind(1,eq)
+  
+  #perform matrix multiplication on eq to recieve y values. return them
+  eq %*% coef
+  
 }
