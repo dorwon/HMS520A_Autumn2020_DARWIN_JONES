@@ -47,7 +47,7 @@ create_formula <- function(ind_var, dep_var, intercept = TRUE) {
   my_form <- append(my_form, "~", 1)
   
   if( len <= 1) {
-    return(as.formula(my_form))
+    return(as.formula(paste(my_form, collapse = " ")))
   }
   
   for(i in seq(3,(len * 2 - 1),2)) {
@@ -138,3 +138,10 @@ df_tb_inc <- df_tb_pop %>%
 # for i_r ~ 1 + year
 
 coefs <- regress_group_data(df_tb_inc,group_id =  "Country.Name",obs = "incidence_ratio", cov = "year",include_intercept = TRUE)
+
+#3.5 create a bar plot of all country coefficients 
+# arranged from highest to lowest
+
+#arrange from high to low
+coefs <- coefs %>% arrange(desc(year))
+barplot(coefs$year, width = 5, xlab = "Countries", ylab = "Coefficient of TB incidence rate")
