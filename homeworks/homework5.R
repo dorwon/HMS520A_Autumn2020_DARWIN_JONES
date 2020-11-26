@@ -9,6 +9,7 @@ library(data.table)
 library(ggplot2)
 library(gridExtra)
 library(lme4)
+library(sjPlot)
 
 # Problem 1 ---------------------------------------------------------------
 # In this problem, we try to answer which study division makes more sense. 
@@ -154,25 +155,31 @@ model1 <- regress_group_data(data = dt,
 # problems above. After you have the result, plot the prediction against data 
 # for each study.
 
-fit <- lmer(formula = obs ~ cov1 * exposure + (1|study_id1),
+fit <- lmer(obs ~ cov1 + (1 + exposure|study_id1),
            data = dt)
-
-# graph all predictions
-ggplot(fit, aes(.fitted, residual, color = factor(study_id1))) + 
-  stat_summary(fun.data = mean_se) +
-  stat_summary(aes(y=.fitted), fun = mean, geom = 'line')
+dt$fit <- predict(fit)
+dt$error <- 1.0193 / 10 # calculate standard error from model
 
 
-# graph each prediction against the data for each study
+# graph all predictions next to data
 
-graphs <- rep(NA, 10)
+ggplot(dt, aes(cov1, fit, color = factor(study_id1))) + 
+  geom_ribbon(aes(ymax = obs+error, ymin = obs-error), alpha = 0.05) +
+  geom_point(aes(cov1, obs), size = 2)
 
-for(i in 1:length(graphs)) {
+# make 1 graph for each study
+
+graphs <- vector('list', 10)
+
+colors <- RColorBrewer::brewer.pal(name="Paired", n=10)
+
+for(i in seq(1,10)){
   
-  #select data from study_id == i
-  pred <- subset(fort, study_id1 == i, select = c(obs, cov1))
-  data <- subset(dt, study_id1 == i, select = c(obs, cov1))
-  
-  graphs[i] <- ggplot(pred, aes(cov1, obs)) + geom_line(size = 1.5) +
-    geom_line(data) + geom_line(size = 1.5)
+  sub <- subset(dt, study_id1 == i)
+  graphs[[i]] <- ggplot(sub, aes(cov1, fit)) + 
+    geom_ribbon(aes(ymax = obs+error, ymin = obs-error), alpha = 0.05, color = colors[i]) +
+    geom_point(aes(cov1, obs), size = 2, color = colors[i]) +
+    ggtitle(paste0("Study #",i))
 }
+
+grid.arrange(grobs = graphs, nrow = 2)
